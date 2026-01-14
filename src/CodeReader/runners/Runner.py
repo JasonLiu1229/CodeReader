@@ -27,7 +27,7 @@ class GradeResult:
     error: Optional[str] = None
 
 
-class BaseRunner(Protocol):
+class BaseRunner(Protocol): # So if we implement other runners they need to atleast adhere to these things (contracting)
     """
     Minimal runner contract.
     Each runner knows how to:
@@ -58,7 +58,7 @@ async def run_subprocess(
     env: Optional[Dict[str, str]] = None,
 ) -> RunnerResult:
     """
-    Robust async subprocess runner:
+    Async subprocess runner:
     - writes stdin
     - captures stdout/stderr
     - enforces timeout
