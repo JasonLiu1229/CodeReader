@@ -5,7 +5,7 @@ DEFAULT_GRADE_PROMPT = """
     Return JSON ONLY (no markdown, no extra text), exactly in this schema:
     {{"score": <integer 0-100>, "rationale": "<short explanation>"}}
 
-    Tag: {tag}
+    Tags: {tags}
     Language: {language}
 
     Code:

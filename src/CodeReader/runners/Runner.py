@@ -4,7 +4,7 @@ import asyncio
 import json
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Protocol
+from typing import Any, Dict, Optional, Protocol, List
 
 
 @dataclass(frozen=True)
@@ -43,7 +43,7 @@ class BaseRunner(Protocol): # So if we implement other runners they need to atle
         self,
         code: str,
         *,
-        tag: str,
+        tags: List[str],
         language: str,
         timeout_s: float = 120.0,
         max_output_tokens: Optional[int] = None,
