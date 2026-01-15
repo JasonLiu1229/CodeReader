@@ -1,0 +1,22 @@
+language: java
+
+tags:
+  - testing
+  - unit tests
+
+settings:
+  timeout_seconds: 120
+  health_timeout_seconds: 15
+  max_concurrency: 2
+  fail_on_no_active_models: true
+  log_path: readability_log.txt
+  debug_jsonl_path: responses.jsonl
+
+models:
+  - name: Qwen2.5-coder
+    model: qwen2.5-coder
+    runner: ollama
+    runner_config:
+      ollama_bin: ollama
+    weight: 1
+    enable: true
