@@ -6,7 +6,9 @@ from CodeReader.runners.ollama_runner import OllamaRunner
 
 @pytest.mark.anyio
 async def test_health_check_success_contains_ok(monkeypatch):
-    async def fake_run_subprocess(cmd, *, stdin_text=None, timeout_s=60.0, env=None) -> ollama_mod.RunnerResult:
+    async def fake_run_subprocess(
+        cmd, *, stdin_text=None, timeout_s=60.0, env=None
+    ) -> ollama_mod.RunnerResult:
         return ollama_mod.RunnerResult(
             ok=True,
             stdout="OK\n",
@@ -27,7 +29,9 @@ async def test_health_check_success_contains_ok(monkeypatch):
 
 @pytest.mark.anyio
 async def test_health_check_propagates_subprocess_failure(monkeypatch):
-    async def fake_run_subprocess(cmd, *, stdin_text=None, timeout_s=60.0, env=None) -> ollama_mod.RunnerResult:
+    async def fake_run_subprocess(
+        cmd, *, stdin_text=None, timeout_s=60.0, env=None
+    ) -> ollama_mod.RunnerResult:
         return ollama_mod.RunnerResult(
             ok=False,
             stdout="",
