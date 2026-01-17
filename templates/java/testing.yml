@@ -18,5 +18,5 @@ models:
     runner: ollama
     runner_config:
       ollama_bin: ollama
-    weight: 1
+    weight: 1.0
     enable: true
