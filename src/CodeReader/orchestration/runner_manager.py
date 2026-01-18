@@ -99,3 +99,19 @@ def load_config_yaml(path: str) -> AppConfig:
     with open(path, "r", encoding="utf-8") as f:
         raw = yaml.safe_load(f)
     return parse_config_dict(raw)
+
+class RunnerManager:
+    
+    def __init__(self, config: AppConfig):
+        self.config = config
+        self._all_runners: List[BaseRunner] = []
+        self.active_runners: List[BaseRunner] = []
+
+    def build_runners(self) -> List[BaseRunner]:
+        ...
+        
+    async def initialize(self) -> None:
+        ...
+        
+    def get_context(self) -> Tuple[str, List[str]]:
+        ...
