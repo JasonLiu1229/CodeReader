@@ -108,10 +108,29 @@ class RunnerManager:
         self.active_runners: List[BaseRunner] = []
 
     def build_runners(self) -> List[BaseRunner]:
-        ...
+        runners: List[BaseRunner] = []
+        
+        for m in self.config.models:
+            runner_type = m.runner.lower().strip()
+
+            if runner_type == "ollama":
+                ollama_bin = str(m.runner_config.get("ollama_bin", "ollama"))
+                runners.append(
+                    OllamaRunner(
+                        name=m.name,
+                        model=m.model,
+                        ollama_bin=ollama_bin,
+                    )
+                )
+            else:
+                # TODO: add "llamacpp" / "transformers" here
+                raise ValueError(f"Unsupported runner type: '{m.runner}' for model '{m.name}'")
+        
+        self._all_runners = runners
+        return runners
         
     async def initialize(self) -> None:
         ...
         
     def get_context(self) -> Tuple[str, List[str]]:
-        ...
+        return self.config.language, self.config.tags
