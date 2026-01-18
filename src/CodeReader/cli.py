@@ -1,6 +1,10 @@
 import typer
-app = typer.Typer()
+
+app = typer.Typer(add_completion=False)
 
 @app.command()
-def run():
-    pass
+def grade():
+    ...
+
+if __name__ == "__main__":
+    app()
