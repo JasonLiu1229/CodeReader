@@ -4,7 +4,7 @@ import asyncio
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from CodeReader.orchestration.runner_manager import AppConfig, ModelConfig
+from CodeReader.orchestration.runner_manager import AppConfig
 
 from CodeReader.runners.runner import BaseRunner, GradeResult
 
