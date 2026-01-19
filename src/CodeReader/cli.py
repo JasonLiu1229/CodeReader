@@ -106,5 +106,5 @@ def grade(
         print(f"[green]Logged:[/green] {cfg.settings.log_path}")
 
 
-if __name__ == "__main__":
-    app()
+# if __name__ == "__main__":
+#     app()
