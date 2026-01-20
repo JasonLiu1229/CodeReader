@@ -29,7 +29,7 @@ ty = "^0.0.11"
 anyio = "^4.12.1"
 
 [tool.poetry.scripts]
-codereader = "codereader.cli:main"
+codereader = "codereader.cli:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

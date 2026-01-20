@@ -13,8 +13,12 @@ from codereader.logger.result_logger import ResultLogger
 from codereader.orchestration.grading_engine import FileGrade, GradingEngine
 from codereader.orchestration.runner_manager import load_config_yaml, RunnerManager
 
-app = typer.Typer(add_completion=False)
+app = typer.Typer(add_completion=False, help="CodeReader CLI")
 
+@app.callback()
+def main() -> None:
+    """CodeReader command line interface."""
+    pass
 
 def _read_code(
     file: Optional[Path], text: Optional[str], stdin: bool
@@ -59,7 +63,6 @@ def _print_result(result: FileGrade) -> None:
     print(
         f"[bold]Weighted average:[/bold] {result.weighted_average if result.weighted_average is not None else 'N/A'}"
     )
-
 
 @app.command("grade")
 def grade(
@@ -106,8 +109,5 @@ def grade(
         print(f"[green]Logged:[/green] {cfg.settings.log_path}")
 
 
-def main():
-    app()
-
 if __name__ == "__main__":
-    main()
+    app()
