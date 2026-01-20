@@ -61,7 +61,7 @@ def _print_result(result: FileGrade) -> None:
     )
 
 
-@app.command()
+@app.command("grade")
 def grade(
     config: Path = typer.Option(
         ..., "--config", "-c", exists=True, dir_okay=False, readable=True
@@ -106,5 +106,8 @@ def grade(
         print(f"[green]Logged:[/green] {cfg.settings.log_path}")
 
 
-# if __name__ == "__main__":
-#     app()
+def main():
+    app()
+
+if __name__ == "__main__":
+    main()
