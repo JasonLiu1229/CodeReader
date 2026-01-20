@@ -6,8 +6,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
-from CodeReader.runners.ollama_runner import OllamaRunner
-from CodeReader.runners.runner import BaseRunner, RunnerResult
+from codereader.runners.ollama_runner import OllamaRunner
+from codereader.runners.runner import BaseRunner, RunnerResult
 
 
 @dataclass(frozen=True)

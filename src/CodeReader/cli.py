@@ -8,10 +8,10 @@ import typer
 from rich import print
 from rich.table import Table
 
-from CodeReader.logger.result_logger import ResultLogger
+from codereader.logger.result_logger import ResultLogger
 
-from CodeReader.orchestration.grading_engine import FileGrade, GradingEngine
-from CodeReader.orchestration.runner_manager import load_config_yaml, RunnerManager
+from codereader.orchestration.grading_engine import FileGrade, GradingEngine
+from codereader.orchestration.runner_manager import load_config_yaml, RunnerManager
 
 app = typer.Typer(add_completion=False)
 

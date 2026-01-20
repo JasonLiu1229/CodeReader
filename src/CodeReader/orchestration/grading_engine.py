@@ -4,9 +4,9 @@ import asyncio
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from CodeReader.orchestration.runner_manager import AppConfig
+from codereader.orchestration.runner_manager import AppConfig
 
-from CodeReader.runners.runner import BaseRunner, GradeResult
+from codereader.runners.runner import BaseRunner, GradeResult
 
 
 @dataclass(frozen=True)

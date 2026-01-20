@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 
-from CodeReader.orchestration.grading_engine import FileGrade, GradingEngine
+from codereader.orchestration.grading_engine import FileGrade, GradingEngine
 
 
 class ResultLogger:
