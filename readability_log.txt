@@ -1,2 +1,0 @@
-..\..\out\dataset\test\parse_ok\TestClass10000.java, [85], avg([85]) = 85.00
-..\..\out\dataset\test\parse_ok\TestClass10000.java, [85, 0], avg([85, 0]) = 42.50

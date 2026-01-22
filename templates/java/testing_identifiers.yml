@@ -17,9 +17,25 @@ settings:
 
 models:
   - name: Qwen2.5-coder
-    model: qwen2.5-coder
+    model: qwen2.5-coder:7b
     runner: ollama
     runner_config:
       ollama_bin: ollama
     weight: 1.0
+    enable: true
+
+  - name: Starcoder
+    model: starcoder2:7b
+    runner: ollama
+    runner_config:
+      ollama_bin: ollama
+    weight: 1.0
+    enable: true
+
+  - name: Deepseek
+    model: deepSeek-coder:6.7b
+    runner: ollama
+    runner_config:
+      ollama_bin: ollama
+    weight: 1
     enable: true
