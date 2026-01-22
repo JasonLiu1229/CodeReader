@@ -15,10 +15,12 @@ from codereader.orchestration.runner_manager import load_config_yaml, RunnerMana
 
 app = typer.Typer(add_completion=False, help="CodeReader CLI")
 
+
 @app.callback()
 def main() -> None:
     """CodeReader command line interface."""
     pass
+
 
 def _read_code(
     file: Optional[Path], text: Optional[str], stdin: bool
@@ -42,7 +44,7 @@ def _read_code(
 
 
 def _print_result(result: FileGrade) -> None:
-    table = Table(title=f"Readability grades: {result.filename}")
+    table = Table(title=f"Readability grades: {result.filename}", show_lines=True)
     table.add_column("Model")
     table.add_column("Score", justify="right")
     table.add_column("Weight", justify="right")
@@ -65,6 +67,7 @@ def _print_result(result: FileGrade) -> None:
     print(
         f"[bold]Weighted average:[/bold] {result.weighted_average if result.weighted_average is not None else 'N/A'}"
     )
+
 
 @app.command("grade")
 def grade(
