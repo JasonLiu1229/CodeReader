@@ -3,6 +3,9 @@ language: java
 tags:
   - testing
   - unit tests
+  - identifiers
+  - function naming
+  - variable naming
 
 settings:
   timeout_seconds: 120
@@ -19,11 +22,4 @@ models:
     runner_config:
       ollama_bin: ollama
     weight: 1.0
-    enable: true
-  - name: Codellama
-    model: codellama
-    runner: ollama
-    runner_config:
-      ollama_bin: ollama
-    weight: 0.8
     enable: true

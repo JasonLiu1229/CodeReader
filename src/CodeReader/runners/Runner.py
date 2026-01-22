@@ -24,6 +24,7 @@ class GradeResult:
     raw_stdout: str
     raw_stderr: str
     parsed: Optional[Dict[str, Any]]
+    rationale: str
     error: Optional[str] = None
 
 

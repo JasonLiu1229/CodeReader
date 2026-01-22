@@ -13,6 +13,7 @@ from codereader.runners.runner import BaseRunner, GradeResult
 class ModelGrade:
     model_name: str
     score: Optional[int]
+    rationale: str
     weight: float
     error: Optional[str] = None
     parsed: Optional[Dict] = None
@@ -83,6 +84,7 @@ class GradingEngine:
         for runner, res in results:
             w = self._weight_for(runner)
             score = res.score
+            rationale = res.rationale
 
             model_grades.append(
                 ModelGrade(
@@ -91,6 +93,7 @@ class GradingEngine:
                     weight=w,
                     error=res.error,
                     parsed=res.parsed,
+                    rationale=rationale
                 )
             )
 

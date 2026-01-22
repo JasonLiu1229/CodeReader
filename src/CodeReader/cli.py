@@ -46,6 +46,7 @@ def _print_result(result: FileGrade) -> None:
     table.add_column("Model")
     table.add_column("Score", justify="right")
     table.add_column("Weight", justify="right")
+    table.add_column("Rationale", justify="right")
     table.add_column("Error")
 
     for g in result.grades:
@@ -53,6 +54,7 @@ def _print_result(result: FileGrade) -> None:
             g.model_name,
             "-" if g.score is None else str(g.score),
             f"{g.weight:g}",
+            "-" if g.rationale is None else g.rationale,
             "" if not g.error else g.error,
         )
 

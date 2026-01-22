@@ -68,6 +68,7 @@ class OllamaRunner:
                 raw_stderr=res.stderr,
                 parsed=None,
                 error=res.error or f"ollama exited with {res.exit_code}",
+                rationale=None,
             )
 
         parsed = extract_json_object(res.stdout)
@@ -79,9 +80,11 @@ class OllamaRunner:
                 raw_stderr=res.stderr,
                 parsed=None,
                 error="Could not find/parse JSON object in model output",
+                rationale=None,
             )
 
         score = clamp_score(parsed.get("score"))
+        rationale = parsed.get("rationale")
         if score is None:
             return GradeResult(
                 model_name=self.name,
@@ -99,4 +102,5 @@ class OllamaRunner:
             raw_stderr=res.stderr,
             parsed=parsed,
             error=None,
+            rationale=rationale,
         )
