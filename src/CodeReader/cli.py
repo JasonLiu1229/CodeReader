@@ -13,7 +13,7 @@ from codereader.logger.result_logger import ResultLogger
 from codereader.orchestration.grading_engine import FileGrade, GradingEngine
 from codereader.orchestration.runner_manager import load_config_yaml, RunnerManager
 
-app = typer.Typer(add_completion=False, help="CodeReader CLI")
+app = typer.Typer(add_completion=False, help="CodeReader")
 
 
 @app.callback()
