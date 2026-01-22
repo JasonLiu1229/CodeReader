@@ -6,7 +6,7 @@ tags:
 
 settings:
   timeout_seconds: 120
-  health_timeout_seconds: 15
+  health_timeout_seconds: 900
   max_concurrency: 1
   fail_on_no_active_models: true
   log_path: readability_log.txt
