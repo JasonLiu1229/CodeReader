@@ -13,6 +13,29 @@ from .runner import (
     RunnerResult,
 )
 
+_SERVER_CHECK: RunnerResult | None = None
+
+def _looks_like_ollama_server_down(stderr: str, stdout: str, error: str | None = None) -> bool:
+    text = f"{stdout}\n{stderr}\n{error or ''}".lower()
+    patterns = [
+        "could not connect",
+        "connection refused",
+        "connect: connection refused",
+        "dial tcp",
+        "no such host",
+        "connectex",
+        "actively refused",
+        "ollama server not responding",
+        "could not locate ollama app",
+        "failed to connect",
+        "error: eof",
+        "timed out waiting for server to start",
+        "timeout waiting for server",
+        "timeout after",
+    ]
+    return any(p in text for p in patterns)
+
+
 
 @dataclass(frozen=True)
 class OllamaRunner:
@@ -22,7 +45,45 @@ class OllamaRunner:
     grade_prompt_template: str = DEFAULT_GRADE_PROMPT
     health_prompt: str = DEFAULT_HEALTH_PROMPT
 
+    async def _check_server_running(self, timeout_s: float = 3.0) -> RunnerResult:
+        """
+        Fast preflight check.
+        """
+        global _SERVER_CHECK
+        
+        if _SERVER_CHECK is not None:
+            return _SERVER_CHECK
+    
+        cmd = [self.ollama_bin, "list"]
+        res = await run_subprocess(cmd, timeout_s=timeout_s)
+
+        if res.ok:
+            _SERVER_CHECK = res
+            return res
+
+        if _looks_like_ollama_server_down(res.stderr, res.stdout, res.error):
+            _SERVER_CHECK = RunnerResult(
+                ok=False,
+                stdout=res.stdout,
+                stderr=res.stderr,
+                exit_code=res.exit_code,
+                duration_s=res.duration_s,
+                error=(
+                    "Ollama server doesn't seem to be running.\n"
+                    "Start it first with: `ollama serve`\n"
+                    "Then retry your command."
+                ),
+            )
+            return _SERVER_CHECK
+
+        _SERVER_CHECK = res
+        return res
+
     async def health_check(self, timeout_s: float = 15.0) -> RunnerResult:
+        pre = await self._check_server_running(timeout_s=min(3.0, timeout_s))
+        if not pre.ok:
+            return pre
+
         cmd = [self.ollama_bin, "run", self.model, self.health_prompt]
         res = await run_subprocess(cmd, timeout_s=timeout_s)
 
