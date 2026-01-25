@@ -54,7 +54,7 @@ pip install codereader
 
 ---
 
-## 🚀 Usage
+## Usage
 
 CodeReader exposes a CLI called `codereader`.
 
