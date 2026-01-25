@@ -93,7 +93,7 @@ class GradingEngine:
                     weight=w,
                     error=res.error,
                     parsed=res.parsed,
-                    rationale=rationale
+                    rationale=rationale,
                 )
             )
 

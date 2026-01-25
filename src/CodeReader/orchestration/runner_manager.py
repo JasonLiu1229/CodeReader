@@ -70,19 +70,19 @@ def parse_config_dict(raw: Dict[str, Any]) -> AppConfig:
         log_path=str(settings_raw.get("log_path", "readability_log.txt")),
         debug_jsonl_path=str(settings_raw.get("debug_jsonl_path", "responses.jsonl")),
     )
-    
+
     if settings.max_concurrency < 1:
         raise ValueError("settings.max_concurrency must be >= 1")
-    
+
     models_raw = list(_require(raw, "models"))
     models: List[ModelConfig] = []
 
     for i, model in enumerate(models_raw):
         if not isinstance(model, dict):
             raise ValueError(f"models[{i}] must be a mapping/object")
-        
+
         runner_config = model.get("runner_config", {}) or {}
-        
+
         models.append(
             ModelConfig(
                 name=str(_require(model, "name")),
@@ -91,17 +91,19 @@ def parse_config_dict(raw: Dict[str, Any]) -> AppConfig:
                 runner_config=dict(runner_config),
                 weight=float(model.get("weight", 1.0)),
             )
-        ) 
-    
+        )
+
     return AppConfig(language=language, tags=tags, settings=settings, models=models)
+
 
 def load_config_yaml(path: str) -> AppConfig:
     with open(path, "r", encoding="utf-8") as f:
         raw = yaml.safe_load(f)
     return parse_config_dict(raw)
 
+
 class RunnerManager:
-    
+
     def __init__(self, config: AppConfig):
         self.config = config
         self._all_runners: List[BaseRunner] = []
@@ -110,7 +112,7 @@ class RunnerManager:
 
     def build_runners(self) -> List[BaseRunner]:
         runners: List[BaseRunner] = []
-        
+
         for m in self.config.models:
             runner_type = m.runner.lower().strip()
 
@@ -125,11 +127,13 @@ class RunnerManager:
                 )
             else:
                 # TODO: add "llamacpp" / "transformers" here
-                raise ValueError(f"Unsupported runner type: '{m.runner}' for model '{m.name}'")
-        
+                raise ValueError(
+                    f"Unsupported runner type: '{m.runner}' for model '{m.name}'"
+                )
+
         self._all_runners = runners
         return runners
-        
+
     async def initialize(self) -> None:
         self.build_runners()
 
@@ -137,15 +141,17 @@ class RunnerManager:
 
         async def check_one(runner: BaseRunner) -> Tuple[BaseRunner, RunnerResult]:
             async with sem:
-                res = await runner.health_check(timeout_s=self.config.settings.health_timeout_seconds)
+                res = await runner.health_check(
+                    timeout_s=self.config.settings.health_timeout_seconds
+                )
                 return runner, res
 
         tasks = [asyncio.create_task(check_one(r)) for r in self._all_runners]
         results = await asyncio.gather(*tasks)
-        
+
         active: List[BaseRunner] = []
         report: List[HealthReportItem] = []
-        
+
         for runner, res in results:
             report.append(
                 HealthReportItem(
@@ -161,16 +167,16 @@ class RunnerManager:
             )
             if res.ok:
                 active.append(runner)
-        
+
         self.active_runners = active
         self.report = report
-        
+
         if self.config.settings.fail_on_no_active_models and not self.active_runners:
             errors = "\n".join(
                 f"- {r.model_name} ({r.runner}): {r.error or 'healthcheck failed'}"
                 for r in self.report
             )
             raise RuntimeError(f"No active models after health checks.\n{errors}")
-        
+
     def get_context(self) -> Tuple[str, List[str]]:
         return self.config.language, self.config.tags

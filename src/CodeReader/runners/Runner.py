@@ -4,7 +4,7 @@ import asyncio
 import json
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Protocol, List
+from typing import Any, Dict, List, Optional, Protocol
 
 
 @dataclass(frozen=True)
@@ -28,7 +28,9 @@ class GradeResult:
     error: Optional[str] = None
 
 
-class BaseRunner(Protocol): # So if we implement other runners they need to atleast adhere to these things (contracting)
+class BaseRunner(
+    Protocol
+):  # So if we implement other runners they need to atleast adhere to these things (contracting)
     """
     Minimal runner contract.
     Each runner knows how to:

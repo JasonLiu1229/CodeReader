@@ -15,7 +15,10 @@ from .runner import (
 
 _SERVER_CHECK: RunnerResult | None = None
 
-def _looks_like_ollama_server_down(stderr: str, stdout: str, error: str | None = None) -> bool:
+
+def _looks_like_ollama_server_down(
+    stderr: str, stdout: str, error: str | None = None
+) -> bool:
     text = f"{stdout}\n{stderr}\n{error or ''}".lower()
     patterns = [
         "could not connect",
@@ -36,7 +39,6 @@ def _looks_like_ollama_server_down(stderr: str, stdout: str, error: str | None =
     return any(p in text for p in patterns)
 
 
-
 @dataclass(frozen=True)
 class OllamaRunner:
     name: str  # just as an username (for like eas of use)
@@ -50,10 +52,10 @@ class OllamaRunner:
         Fast preflight check.
         """
         global _SERVER_CHECK
-        
+
         if _SERVER_CHECK is not None:
             return _SERVER_CHECK
-    
+
         cmd = [self.ollama_bin, "list"]
         res = await run_subprocess(cmd, timeout_s=timeout_s)
 
