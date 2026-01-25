@@ -6,6 +6,7 @@ authors = [
     {name = "Jason Liu",email = "Liujason2003@gmail.com"}
 ]
 readme = "README.md"
+license = { text = "GPLv3" }
 packages = [{ include = "codereader", from = "src" }]
 requires-python = ">=3.12"
 dependencies = [
@@ -16,7 +17,13 @@ dependencies = [
     "anyio (>=4.12.1,<5.0.0)",
     "orjson (>=3.11.5,<4.0.0)",
 ]
-
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+license-files = ["LICENSE"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
