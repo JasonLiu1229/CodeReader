@@ -6,7 +6,7 @@ authors = [
     {name = "Jason Liu",email = "Liujason2003@gmail.com"}
 ]
 readme = "README.md"
-license = { text = "GPLv3" }
+license = "GPLv3"
 packages = [{ include = "codereader", from = "src" }]
 requires-python = ">=3.12"
 dependencies = [
@@ -34,6 +34,7 @@ ruff = "^0.14.11"
 pytest = "^9.0.2"
 ty = "^0.0.11"
 anyio = "^4.12.1"
+twine = "^6.2.0"
 
 [tool.poetry.scripts]
 codereader = "codereader.cli:app"
