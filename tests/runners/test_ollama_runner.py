@@ -1,7 +1,7 @@
-import codeReader.runners.ollama_runner as ollama_mod
+import codereader.runners.ollama_runner as ollama_mod
 import pytest
 
-from codeReader.runners.ollama_runner import OllamaRunner
+from codereader.runners.ollama_runner import OllamaRunner
 
 
 @pytest.mark.anyio
