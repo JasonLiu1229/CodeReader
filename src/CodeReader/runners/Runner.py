@@ -71,55 +71,6 @@ def _post_request(
     )
 
 
-async def run_apicall(
-    *,
-    url: str,
-    payload: Dict[str, Any],
-    headers: Optional[Dict[str, str]] = None,
-    timeout_s: float = 60.0,
-) -> RunnerResult:
-    headers = headers or {}
-
-    try:
-        response = await asyncio.to_thread(
-            _post_request,
-            url=url,
-            payload=payload,
-            headers=headers,
-            timeout_s=timeout_s,
-        )
-
-        if not response.ok:
-            return RunnerResult(
-                ok=False,
-                error=f"HTTP {response.status_code}: {response.text}",
-            )
-
-        try:
-            data = response.json()
-        except json.JSONDecodeError as e:
-            return RunnerResult(
-                ok=False,
-                error=f"Invalid JSON response: {e}",
-            )
-
-        return RunnerResult(
-            ok=True,
-            raw=data,
-        )
-
-    except requests.Timeout:
-        return RunnerResult(
-            ok=False,
-            error="API request timed out",
-        )
-    except requests.RequestException as e:
-        return RunnerResult(
-            ok=False,
-            error=str(e),
-        )
-
-
 async def run_subprocess(
     cmd: list[str],
     *,

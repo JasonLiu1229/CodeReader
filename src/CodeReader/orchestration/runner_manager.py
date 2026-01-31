@@ -7,8 +7,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import yaml
 
 from codereader.runners.ollama_runner import OllamaRunner
+from codereader.runners.openai_runner import OpenAIRunner
 from codereader.runners.runner import BaseRunner, RunnerResult
 
+import os
+from dotenv import load_dotenv
+from pathlib import Path
 
 @dataclass(frozen=True)
 class Settings:
@@ -101,6 +105,13 @@ def load_config_yaml(path: str) -> AppConfig:
         raw = yaml.safe_load(f)
     return parse_config_dict(raw)
 
+def get_api_key(path: str = None):
+    if path:
+        load_dotenv(dotenv_path=Path(path))
+    else:
+        load_dotenv()
+    return os.getenv('API_KEY')
+        
 
 class RunnerManager:
 
@@ -123,6 +134,20 @@ class RunnerManager:
                         name=m.name,
                         model=m.model,
                         ollama_bin=ollama_bin,
+                    )
+                )
+            elif runner_type == "openai":
+                temperature = float(m.runner_config.get("temperature", 0.0))
+                base_url = str(m.runner_config.get("base_url", "https://api.openai.com/v1/chat/completions"))
+                env_path = m.runner_config.get("env_path", None)
+                api_key = get_api_key(env_path)
+                runners.append(
+                    OpenAIRunner(
+                        name=m.name,
+                        model=m.model,
+                        base_url=base_url,
+                        api_key=api_key,
+                        temperature=temperature
                     )
                 )
             else:
