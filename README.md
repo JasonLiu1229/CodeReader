@@ -14,6 +14,7 @@ This tool is designed primarily for **research and experimentation**, especially
 - **Tag-based evaluation** (e.g. identifiers, structure, comments)
 - **Structured logging** of all grading results
 - **Fully local execution** (no cloud APIs required)
+- **OpenAi support** for api based grading (does require an api key)
 - **Configurable via YAML** (models, weights, prompts, tags)
 
 ---

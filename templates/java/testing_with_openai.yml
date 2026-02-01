@@ -13,13 +13,13 @@ settings:
   debug_jsonl_path: responses.jsonl
 
 models:
-  # - name: Qwen2.5-coder
-  #   model: qwen2.5-coder
-  #   runner: ollama
-  #   runner_config:
-  #     ollama_bin: ollama
-  #   weight: 1.0
-  #   enable: true
+  - name: Qwen2.5-coder
+    model: qwen2.5-coder
+    runner: ollama
+    runner_config:
+      ollama_bin: ollama
+    weight: 1.0
+    enable: true
 
   - name: OpenAI
     model: gpt-5-mini
