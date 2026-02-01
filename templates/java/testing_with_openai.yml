@@ -13,19 +13,18 @@ settings:
   debug_jsonl_path: responses.jsonl
 
 models:
-  - name: Qwen2.5-coder
-    model: qwen2.5-coder
-    runner: ollama
-    runner_config:
-      ollama_bin: ollama
-    weight: 1.0
-    enable: true
+  # - name: Qwen2.5-coder
+  #   model: qwen2.5-coder
+  #   runner: ollama
+  #   runner_config:
+  #     ollama_bin: ollama
+  #   weight: 1.0
+  #   enable: true
 
   - name: OpenAI
     model: gpt-5-mini
     runner: openai
     runner_config:
-      temperature: 0.0
       # env_path: .env # if the the env_path is not given we use the default .env path in current work directory
       # base_url: https://api.openai.com/v1/chat/completions # if not given this is the default path
     weight: 1

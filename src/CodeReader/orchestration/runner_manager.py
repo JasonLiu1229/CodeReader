@@ -137,8 +137,7 @@ class RunnerManager:
                     )
                 )
             elif runner_type == "openai":
-                temperature = float(m.runner_config.get("temperature", 0.0))
-                base_url = str(m.runner_config.get("base_url", "https://api.openai.com/v1/chat/completions"))
+                base_url = str(m.runner_config.get("base_url", "https://api.openai.com/v1"))
                 env_path = m.runner_config.get("env_path", None)
                 api_key = get_api_key(env_path)
                 runners.append(
@@ -147,7 +146,6 @@ class RunnerManager:
                         model=m.model,
                         base_url=base_url,
                         api_key=api_key,
-                        temperature=temperature
                     )
                 )
             else:

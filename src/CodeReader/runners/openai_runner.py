@@ -66,8 +66,7 @@ class OpenAIRunner:
     grade_prompt_template: str = DEFAULT_GRADE_PROMPT
     health_prompt: str = DEFAULT_HEALTH_PROMPT
 
-    base_url: str = "https://api.openai.com/v1/chat/completions"
-    temperature: float = 0.0
+    base_url: str = "https://api.openai.com/v1"
 
     def _headers(self) -> Dict[str, str]:
         return {
@@ -88,7 +87,6 @@ class OpenAIRunner:
         payload: Dict[str, Any] = {
             "model": self._model_name(),
             "messages": [{"role": "user", "content": self.health_prompt}],
-            "temperature": 0.0,
         }
 
         try:
@@ -189,7 +187,6 @@ class OpenAIRunner:
         payload: Dict[str, Any] = {
             "model": self._model_name(),
             "messages": [{"role": "user", "content": prompt}],
-            "temperature": float(self.temperature),
         }
         if max_output_tokens is not None:
             payload["max_tokens"] = int(max_output_tokens)
