@@ -51,6 +51,7 @@ class GradingEngine:
         code: str,
         tags: Optional[List[str]] = None,
         language: Optional[str] = None,
+        rules: Optional[List[str]] = None,
     ) -> FileGrade:
         """
         Grade a single code blob.
@@ -61,6 +62,9 @@ class GradingEngine:
         if language is None:
             language = self.config.language
 
+        if rules is None:
+            rules = getattr(self.config, "rules", None)
+
         sem = asyncio.Semaphore(self.config.settings.max_concurrency)
 
         async def run_one(runner: BaseRunner) -> Tuple[BaseRunner, GradeResult]:
@@ -70,6 +74,7 @@ class GradingEngine:
                     tags=tags,
                     language=language,
                     timeout_s=self.config.settings.timeout_seconds,
+                    rules=rules,
                 )
                 return runner, res
 

@@ -110,13 +110,19 @@ class OllamaRunner:
         *,
         tags: List[str],
         language: str,
+        rules: List[str] = None,
         timeout_s: float = 120.0,
         max_output_tokens: Optional[int] = None,
     ) -> GradeResult:
         tags_str = ", ".join(tags)
 
+        if not rules:
+            rules_str = "No specific rules specified"
+        else:
+            rules_str = ", ".join(rules)
+
         prompt = self.grade_prompt_template.format(
-            tags=tags_str, language=language, code=code
+            tags=tags_str, language=language, code=code, rules=rules_str
         )
 
         cmd = [self.ollama_bin, "run", self.model]

@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 import requests
 
 from .prompts import DEFAULT_GRADE_PROMPT, DEFAULT_HEALTH_PROMPT
-from .runner import GradeResult, RunnerResult, clamp_score, extract_json_object
+from .runner import clamp_score, extract_json_object, GradeResult, RunnerResult
 
 
 def _post_json(
@@ -174,14 +174,19 @@ class OpenAIRunner:
         *,
         tags: List[str],
         language: str,
+        rules: List[str] = None,
         timeout_s: float = 120.0,
         max_output_tokens: Optional[int] = None,
     ) -> GradeResult:
         tags_str = ", ".join(tags)
+
+        if not rules:
+            rules_str = "No specific rules specified"
+        else:
+            rules_str = ", ".join(rules)
+
         prompt = self.grade_prompt_template.format(
-            tags=tags_str,
-            language=language,
-            code=code,
+            tags=tags_str, language=language, code=code, rules=rules_str
         )
 
         payload: Dict[str, Any] = {

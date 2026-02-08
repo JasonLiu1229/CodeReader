@@ -1,0 +1,46 @@
+language: java
+
+tags:
+  - testing
+  - unit tests
+  - identifiers
+  - function naming
+  - variable naming
+
+settings:
+  timeout_seconds: 120
+  health_timeout_seconds: 900
+  max_concurrency: 1
+  fail_on_no_active_models: true
+  log_path: readability_log.txt
+  debug_jsonl_path: responses.jsonl
+
+rules:
+  - Only focus on the identifiers, this includes function names and variable names
+  - Do NOT grade the structure and typing of the code
+  - Do NOT focus on comments
+
+models:
+  - name: Qwen2.5-coder
+    model: qwen2.5-coder:7b
+    runner: ollama
+    runner_config:
+      ollama_bin: ollama
+    weight: 1.0
+    enable: true
+
+  - name: Starcoder
+    model: starcoder2:7b
+    runner: ollama
+    runner_config:
+      ollama_bin: ollama
+    weight: 1.0
+    enable: true
+
+  - name: Deepseek
+    model: deepSeek-coder:6.7b
+    runner: ollama
+    runner_config:
+      ollama_bin: ollama
+    weight: 1.0
+    enable: true

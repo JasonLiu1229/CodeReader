@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+
+import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
@@ -9,10 +12,8 @@ import yaml
 from codereader.runners.ollama_runner import OllamaRunner
 from codereader.runners.openai_runner import OpenAIRunner
 from codereader.runners.runner import BaseRunner, RunnerResult
-
-import os
 from dotenv import load_dotenv
-from pathlib import Path
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -39,6 +40,7 @@ class AppConfig:
     tags: List[str]
     settings: Settings
     models: List[ModelConfig]
+    rules: Optional[List[str]]
 
 
 @dataclass(frozen=True)
@@ -62,6 +64,11 @@ def _require(d: Dict[str, Any], key: str) -> Any:
 def parse_config_dict(raw: Dict[str, Any]) -> AppConfig:
     language = str(_require(raw, "language"))
     tags = list(_require(raw, "tags"))
+
+    if "rules" in raw:
+        rules = list(raw["rules"])
+    else:
+        rules = None
 
     settings_raw = raw.get("settings", {}) or {}
     settings = Settings(
@@ -97,7 +104,9 @@ def parse_config_dict(raw: Dict[str, Any]) -> AppConfig:
             )
         )
 
-    return AppConfig(language=language, tags=tags, settings=settings, models=models)
+    return AppConfig(
+        language=language, tags=tags, settings=settings, models=models, rules=rules
+    )
 
 
 def load_config_yaml(path: str) -> AppConfig:
@@ -105,13 +114,14 @@ def load_config_yaml(path: str) -> AppConfig:
         raw = yaml.safe_load(f)
     return parse_config_dict(raw)
 
+
 def get_api_key(path: str = None):
     if path:
         load_dotenv(dotenv_path=Path(path))
     else:
         load_dotenv()
-    return os.getenv('API_KEY')
-        
+    return os.getenv("API_KEY")
+
 
 class RunnerManager:
 
@@ -137,7 +147,9 @@ class RunnerManager:
                     )
                 )
             elif runner_type == "openai":
-                base_url = str(m.runner_config.get("base_url", "https://api.openai.com/v1"))
+                base_url = str(
+                    m.runner_config.get("base_url", "https://api.openai.com/v1")
+                )
                 env_path = m.runner_config.get("env_path", None)
                 api_key = get_api_key(env_path)
                 runners.append(

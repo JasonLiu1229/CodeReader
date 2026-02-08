@@ -51,6 +51,7 @@ class BaseRunner(
         *,
         tags: List[str],
         language: str,
+        rules: List[str] = None,
         timeout_s: float = 120.0,
         max_output_tokens: Optional[int] = None,
     ) -> GradeResult: ...
