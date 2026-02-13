@@ -150,13 +150,35 @@ class GradingEngine:
         return [g.score for g in file_grade.grades if g.score is not None]
 
     @staticmethod
+    def weights_array(file_grade: FileGrade) -> List[float]:
+        """
+        Returns a simple list of float weights from successful scores, in model order.
+        """
+        return [g.weight for g in file_grade.grades if g.score is not None]
+
+    @staticmethod
+    def weighted_average(scores, weights):
+        if len(scores) != len(weights):
+            raise ValueError("Scores and weights must have the same length")
+
+        total_weight = sum(weights)
+        if total_weight == 0:
+            raise ValueError("Sum of weights must not be zero")
+
+        weighted_sum = sum(score * weight for score, weight in zip(scores, weights))
+        return weighted_sum / total_weight
+
+    @staticmethod
     def format_log_line(file_grade: FileGrade) -> str:
         """
         Formats based on:
-          filename, [grades], avg([grades]) = total
+          filename, [grades], avg([grades]) = total, wavg([grades], [weights]) = weighted average
         """
         grades = GradingEngine.grades_array(file_grade)
+        weights = GradingEngine.weights_array(file_grade)
         if grades:
             avg = sum(grades) / len(grades)
-            return f"{file_grade.filename}, {grades}, avg({grades}) = {avg:.2f}"
-        return f"{file_grade.filename}, [], avg([]) = N/A"
+            wavg = GradingEngine.weighted_average(grades, weights)
+
+            return f"{file_grade.filename}, {grades}, avg({grades}) = {avg:.2f}, wavg({grades}, {weights}) = {wavg}"
+        return f"{file_grade.filename}, [], avg([]) = N/A, wavg([], []) = N/A"

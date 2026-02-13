@@ -12,6 +12,7 @@ This tool is designed primarily for **research and experimentation**, especially
 - **Weighted averages** across multiple models
 - **Model rationales** explaining _why_ a score was given
 - **Tag-based evaluation** (e.g. identifiers, structure, comments)
+- **Rule-based evaluation** it is possible to add more custom rules
 - **Structured logging** of all grading results
 - **Fully local execution** (no cloud APIs required)
 - **OpenAi support** for api based grading (does require an api key)
@@ -190,9 +191,8 @@ Please open an issue or pull request.
 CodeReader is an active research project, and several features are planned or being explored for future versions:
 
 - Additional LLM backends
-  - API-based LLMs (e.g. OpenAI-, Anthropic-, or OpenAI-compatible endpoints)
+  - More API-based LLMs (e.g. OpenAI-, Anthropic-, or OpenAI-compatible endpoints)
   - Support for remote inference alongside local runners
-  - Unified interface so local and API-based models can be mixed in one evaluation
 
 - More runner types
   - API-based chat/completion models

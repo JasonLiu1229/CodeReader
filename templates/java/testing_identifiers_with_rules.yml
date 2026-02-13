@@ -1,24 +1,26 @@
 language: java
 
-tags:
+settings:
+  timeout_seconds: 120
+  health_timeout_seconds: 900
+  max_concurrency: 1
+  fail_on_no_active_models: true
+  log_path: readability_results.txt
+  debug_jsonl_path: responses.jsonl
+
+tags: # Context clues for models
   - testing
   - unit tests
   - identifiers
   - function naming
   - variable naming
 
-settings:
-  timeout_seconds: 120
-  health_timeout_seconds: 900
-  max_concurrency: 1
-  fail_on_no_active_models: true
-  log_path: readability_log.txt
-  debug_jsonl_path: responses.jsonl
-
-rules:
-  - Only focus on the identifiers, this includes function names and variable names
-  - Do NOT grade the structure and typing of the code
-  - Do NOT focus on comments
+rules: # So users can add custom prompting (more freedom)
+  - Clarity 
+  - Behavioral specificity 
+  - Consistency with JUnit naming conventions 
+  - Alignment with actual test logic
+  - Ignore class name
 
 models:
   - name: Qwen2.5-coder
@@ -26,15 +28,7 @@ models:
     runner: ollama
     runner_config:
       ollama_bin: ollama
-    weight: 1.0
-    enable: true
-
-  - name: Starcoder
-    model: starcoder2:7b
-    runner: ollama
-    runner_config:
-      ollama_bin: ollama
-    weight: 1.0
+    weight: 1.2
     enable: true
 
   - name: Deepseek
@@ -42,5 +36,13 @@ models:
     runner: ollama
     runner_config:
       ollama_bin: ollama
-    weight: 1.0
+    weight: 1.5
+    enable: true
+
+  - name: Phi
+    model: phi3:medium
+    runner: ollama
+    runner_config:
+      ollama_bin: ollama
+    weight: 0.6
     enable: true
