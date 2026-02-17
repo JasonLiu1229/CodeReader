@@ -68,6 +68,14 @@ def _print_result(result: FileGrade) -> None:
         f"[bold]Weighted average:[/bold] {result.weighted_average if result.weighted_average is not None else 'N/A'}"
     )
 
+def _print_result_simple(result: FileGrade) -> None:
+    print(
+        f"[bold]Average:[/bold] {result.average if result.average is not None else 'N/A'}"
+    )
+    print(
+        f"[bold]Weighted average:[/bold] {result.weighted_average if result.weighted_average is not None else 'N/A'}"
+    )
+
 
 @app.command("grade")
 def grade(
@@ -82,7 +90,8 @@ def grade(
     name: Optional[str] = typer.Option(
         None, "--name", help="Label used as 'filename' in the log."
     ),
-    quiet: bool = typer.Option(False, "--quiet", help="Disable console output"),
+    quiet: bool = typer.Option(False, "--quiet", help="Disable console output, takes priotity over simple"),
+    simple: bool= typer.Option(False, "--simple", help="Console output is simplified")
 ) -> None:
     """
     Grade a single code input using the YAML config.
@@ -110,7 +119,10 @@ def grade(
     logger.append_result(result)
 
     if not quiet:
-        _print_result(result)
+        if not simple:
+            _print_result(result)
+        else:
+            _print_result_simple(result)
         print(f"[green]Logged:[/green] {cfg.settings.log_path}")
 
 

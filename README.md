@@ -88,6 +88,7 @@ cat example.py | codereader grade -c config.yml --stdin
 
 - `--name` – override filename label in logs
 - `--quiet` – suppress console output (logging still happens)
+- `--simple` – simplified console output (quiet takes priority over simple)
 
 ---
 
