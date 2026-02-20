@@ -68,6 +68,7 @@ def _print_result(result: FileGrade) -> None:
         f"[bold]Weighted average:[/bold] {result.weighted_average if result.weighted_average is not None else 'N/A'}"
     )
 
+
 def _print_result_simple(result: FileGrade) -> None:
     print(
         f"[bold]Average:[/bold] {result.average if result.average is not None else 'N/A'}"
@@ -90,8 +91,10 @@ def grade(
     name: Optional[str] = typer.Option(
         None, "--name", help="Label used as 'filename' in the log."
     ),
-    quiet: bool = typer.Option(False, "--quiet", help="Disable console output, takes priotity over simple"),
-    simple: bool= typer.Option(False, "--simple", help="Console output is simplified")
+    quiet: bool = typer.Option(
+        False, "--quiet", help="Disable console output, takes priotity over simple"
+    ),
+    simple: bool = typer.Option(False, "--simple", help="Console output is simplified"),
 ) -> None:
     """
     Grade a single code input using the YAML config.
@@ -124,6 +127,23 @@ def grade(
         else:
             _print_result_simple(result)
         print(f"[green]Logged:[/green] {cfg.settings.log_path}")
+
+
+@app.command("init")
+def init(
+    config: Path = typer.Option(
+        ..., "--config", "-c", exists=True, dir_okay=False, readable=True
+    ),
+):
+    cfg = load_config_yaml(str(config))
+    
+    async def _run() -> FileGrade:
+        manager = RunnerManager(cfg)
+        await manager.initialize()
+        
+    result = asyncio.run(_run())
+    
+    print("[green]Succesfully initialized config")
 
 
 if __name__ == "__main__":
