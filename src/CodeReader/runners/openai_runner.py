@@ -8,6 +8,7 @@ import requests
 
 from .prompts import DEFAULT_GRADE_PROMPT, DEFAULT_HEALTH_PROMPT
 from .runner import clamp_score, extract_json_object, GradeResult, RunnerResult
+from .utils import format_prompt, compute_weighted_score
 
 
 def _post_json(
@@ -174,20 +175,11 @@ class OpenAIRunner:
         *,
         tags: List[str],
         language: str,
-        rules: List[str] = None,
+        rules: Optional[List[str]] = None,
         timeout_s: float = 120.0,
         max_output_tokens: Optional[int] = None,
     ) -> GradeResult:
-        tags_str = ", ".join(tags)
-
-        if not rules:
-            rules_str = "No specific rules specified"
-        else:
-            rules_str = ", ".join(rules)
-
-        prompt = self.grade_prompt_template.format(
-            tags=tags_str, language=language, code=code, rules=rules_str
-        )
+        prompt = format_prompt(self.grade_prompt_template, tags, rules, language, code)
 
         payload: Dict[str, Any] = {
             "model": self._model_name(),
@@ -271,7 +263,7 @@ class OpenAIRunner:
                 error="Could not find/parse JSON object in model output",
             )
 
-        score = clamp_score(parsed.get("score"))
+        score = compute_weighted_score(parsed) or clamp_score(parsed.get("score"))
         rationale = parsed.get("rationale")
 
         if score is None:
