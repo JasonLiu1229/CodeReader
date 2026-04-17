@@ -1,26 +1,67 @@
 language: java
 
 settings:
-  timeout_seconds: 120
+  timeout_seconds: 320
   health_timeout_seconds: 900
   max_concurrency: 1
   fail_on_no_active_models: true
-  log_path: readability_results.txt
+  log_path: out/temp/readability_results.txt
   debug_jsonl_path: responses.jsonl
 
-tags: # Context clues for models
+scoring:
+  scale: 0-100
+  focus: identifier_naming
+  weights:
+    identifier_naming: 0.50
+    assertion_quality: 0.20
+    test_independence: 0.15
+    behavioral_specificity: 0.15
+
+tags:
   - testing
   - unit tests
   - identifiers
   - function naming
   - variable naming
+  - assertion clarity
+  - test independence
 
-rules: # So users can add custom prompting (more freedom)
-  - Clarity 
-  - Behavioral specificity 
-  - Consistency with JUnit naming conventions 
-  - Alignment with actual test logic
-  - Ignore class name
+rules:
+  - Clarity of variable and method names assess whether identifier names clearly
+    convey intent without needing to read the full test body. Penalise generic
+    names like var1, obj, result0, func_1 or single letters unless used as counters.
+
+  - Renamed vs. generic baseline explicitly penalise identifiers that appear to
+    still be auto-generated (e.g. var0, obj1, int0, string1, list0). These
+    represent failures of the renaming step and must receive the maximum penalty
+    on the identifier dimension.
+
+  - Identifier consistency across the test all identifiers within a single test
+    method should follow a coherent naming strategy. If one variable is named
+    expectedUserAge, a related variable should not be named result2. Penalise
+    tests where naming quality is uneven across variables.
+
+  - Alignment with actual test logic identifier names must match what the
+    variable actually holds or what the method actually does. A variable named
+    expectedResult holding an exception object is misleading and must be flagged.
+
+  - Test method naming and behavioral specificity the test method name should
+    follow the pattern methodName_stateUnderTest_expectedBehavior or a similar
+    convention. The name and body together must make the tested behaviour and
+    expected outcome obvious without reading the production code.
+
+  - Assertion quality and magic numbers assertions must be expressive and clearly
+    state what is being verified. Prefer assertEquals, assertNotNull, assertThrows
+    over assertTrue(a == b). Penalise absent assertion messages when the failure
+    reason would be non-obvious. Flag hardcoded numeric or string literals with no
+    named constant or comment explaining their meaning ÔÇö well-named expected value
+    variables (e.g. int expectedAge = 42) are strongly preferred.
+
+  - Test independence the test must be self-contained and not rely on shared
+    mutable state or execution order. Penalise tests that depend on external state
+    or side effects from other tests.
+
+  - Ignore class name do not penalise or reward based on the outer class name.
 
 models:
   - name: Qwen2.5-coder
@@ -29,14 +70,14 @@ models:
     runner_config:
       ollama_bin: ollama
     weight: 1.2
-    enable: true
+    enable: false
 
   - name: Deepseek
     model: deepSeek-coder:6.7b
     runner: ollama
     runner_config:
       ollama_bin: ollama
-    weight: 1.5
+    weight: 1.4
     enable: true
 
   - name: Phi
@@ -44,5 +85,13 @@ models:
     runner: ollama
     runner_config:
       ollama_bin: ollama
-    weight: 0.6
+    weight: 0.75
+    enable: true
+
+  - name: Qwen3.5
+    model: qwen3.5:9b
+    runner: ollama
+    runner_config:
+      ollama_bin: ollama
+    weight: 1.25
     enable: true

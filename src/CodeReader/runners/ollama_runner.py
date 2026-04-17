@@ -47,6 +47,7 @@ class OllamaRunner:
     ollama_bin: str = "ollama"
     grade_prompt_template: str = DEFAULT_GRADE_PROMPT
     health_prompt: str = DEFAULT_HEALTH_PROMPT
+    no_think: bool = False
 
     async def _check_server_running(self, timeout_s: float = 3.0) -> RunnerResult:
         """
@@ -117,10 +118,13 @@ class OllamaRunner:
     ) -> GradeResult:
         prompt = format_prompt(self.grade_prompt_template, tags, rules, language, code)
 
+        if self.no_think:
+            prompt = "/no_think\n" + prompt
+
         cmd = [self.ollama_bin, "run", self.model]
 
         res = await run_subprocess(cmd, stdin_text=prompt, timeout_s=timeout_s)
-
+        print(f"[DEBUG {self.name}] raw output: {repr(res.stdout[:800])}", flush=True)
         if not res.ok:
             return GradeResult(
                 model_name=self.name,
@@ -129,7 +133,7 @@ class OllamaRunner:
                 raw_stderr=res.stderr,
                 parsed=None,
                 error=res.error or f"ollama exited with {res.exit_code}",
-                rationale=None,
+                rationale="",
             )
 
         parsed = extract_json_object(res.stdout)
@@ -141,11 +145,11 @@ class OllamaRunner:
                 raw_stderr=res.stderr,
                 parsed=None,
                 error="Could not find/parse JSON object in model output",
-                rationale=None,
+                rationale="",
             )
 
         score = compute_weighted_score(parsed) or clamp_score(parsed.get("score"))
-        rationale = parsed.get("rationale")
+        rationale = parsed.get("rationale", "")
         if score is None:
             return GradeResult(
                 model_name=self.name,
@@ -154,6 +158,7 @@ class OllamaRunner:
                 raw_stderr=res.stderr,
                 parsed=parsed,
                 error="JSON parsed but 'score' missing or not numeric",
+                rationale=rationale,
             )
 
         return GradeResult(

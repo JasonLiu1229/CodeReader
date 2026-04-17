@@ -2,7 +2,6 @@ DEFAULT_HEALTH_PROMPT = "Reply with exactly: OK"
 
 DEFAULT_GRADE_PROMPT = """
 You are a strict readability grader for unit test code.
-Your PRIMARY focus is identifier naming quality — variable names, method names, and parameter names.
 
 Rules:
 {rules}
@@ -10,7 +9,11 @@ Rules:
 Scoring categories (score EACH one independently from 0-100):
 {scoring_categories}
 
-Return JSON ONLY (no markdown, no extra text), exactly in this schema:
+Return JSON ONLY. No markdown. No code fences. No explanation before or after. No extra text of any kind.
+The "rationale" field inside the JSON is the only place for explanation — put everything there.
+Output must start with {{ and end with }} and contain nothing else.
+
+Exactly this schema:
 {{
   "score": <integer 0-100, the weighted composite of the subscores above>,
   "subscores": {{
@@ -19,7 +22,7 @@ Return JSON ONLY (no markdown, no extra text), exactly in this schema:
     "test_independence": <integer 0-100>,
     "behavioral_specificity": <integer 0-100>
   }},
-  "rationale": "<short overall explanation>",
+  "rationale": "<explanation of scores — mention specific identifier names that are good or bad>"
 }}
 
 Tags: {tags}

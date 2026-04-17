@@ -51,7 +51,7 @@ class BaseRunner(
         *,
         tags: List[str],
         language: str,
-        rules: List[str] = None,
+        rules: Optional[List[str]] = None,
         timeout_s: float = 120.0,
         max_output_tokens: Optional[int] = None,
     ) -> GradeResult: ...
@@ -155,18 +155,72 @@ async def run_subprocess(
         )
 
 
-_JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
+def _try_parse_from(text: str, start: int) -> Optional[Dict[str, Any]]:
+    """Attempt to parse a JSON object starting at `start` using brace-depth scan."""
+    depth = 0
+    in_string = False
+    escape_next = False
+    for i, ch in enumerate(text[start:], start=start):
+        if escape_next:
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    return json.loads(text[start : i + 1])
+                except Exception:
+                    return None
+    return None
 
 
 def extract_json_object(text: str) -> Optional[Dict[str, Any]]:
-    m = _JSON_OBJECT_RE.search(text)
-    if not m:
-        return None
-    blob = m.group(0).strip()
-    try:
-        return json.loads(blob)
-    except Exception:
-        return None
+    """
+    Robustly extract the first valid JSON object from model output.
+
+    Handles:
+    - <think>...</think> XML blocks (DeepSeek-R1 style)
+    - Plain "Thinking..." preamble blocks (Qwen3 via ollama).
+      Qwen3 thinking text may contain { characters (e.g. Java code snippets),
+      so we try ALL candidate { positions and return the first valid parse
+      that contains the expected keys rather than stopping at the first {.
+    - Markdown fences: ```json { ... } ``` (DeepSeek, Phi)
+    - Trailing explanation text after the JSON (DeepSeek)
+    - Nested objects: {"subscores": {"a": 1}}
+    """
+
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+
+    fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+    if fenced:
+        blob = fenced.group(1).strip()
+        try:
+            parsed = json.loads(blob)
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception:
+            pass
+
+    candidates = [i for i, ch in enumerate(text) if ch == "{"]
+    for start in candidates:
+        parsed = _try_parse_from(text, start)
+        if parsed is None:
+            continue
+
+        if any(k in parsed for k in ("score", "subscores", "scores", "rationale")):
+            return parsed
+
+    return None
 
 
 def clamp_score(score: Any) -> Optional[int]:

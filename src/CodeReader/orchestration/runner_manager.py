@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -12,6 +11,7 @@ import yaml
 from codereader.runners.ollama_runner import OllamaRunner
 from codereader.runners.openai_runner import OpenAIRunner
 from codereader.runners.runner import BaseRunner, RunnerResult
+from codereader.runners.utils import DEFAULT_WEIGHTS
 from dotenv import load_dotenv
 
 
@@ -26,12 +26,18 @@ class Settings:
 
 
 @dataclass(frozen=True)
+class ScoringConfig:
+    weights: Dict[str, float]
+
+
+@dataclass(frozen=True)
 class ModelConfig:
     name: str
     model: str
     runner: str
     runner_config: Dict[str, Any]
     weight: float = 1.0
+    enable: bool = True
 
 
 @dataclass(frozen=True)
@@ -41,6 +47,7 @@ class AppConfig:
     settings: Settings
     models: List[ModelConfig]
     rules: Optional[List[str]]
+    scoring: ScoringConfig
 
 
 @dataclass(frozen=True)
@@ -85,6 +92,14 @@ def parse_config_dict(raw: Dict[str, Any]) -> AppConfig:
     if settings.max_concurrency < 1:
         raise ValueError("settings.max_concurrency must be >= 1")
 
+    scoring_raw = raw.get("scoring", {}) or {}
+    weights_raw = scoring_raw.get("weights", {}) or {}
+    scoring = ScoringConfig(
+        weights={k: float(v) for k, v in weights_raw.items()}
+        if weights_raw
+        else dict(DEFAULT_WEIGHTS)
+    )
+
     models_raw = list(_require(raw, "models"))
     models: List[ModelConfig] = []
 
@@ -101,11 +116,17 @@ def parse_config_dict(raw: Dict[str, Any]) -> AppConfig:
                 runner=str(_require(model, "runner")),
                 runner_config=dict(runner_config),
                 weight=float(model.get("weight", 1.0)),
+                enable=bool(model.get("enable", True)),
             )
         )
 
     return AppConfig(
-        language=language, tags=tags, settings=settings, models=models, rules=rules
+        language=language,
+        tags=tags,
+        settings=settings,
+        models=models,
+        rules=rules,
+        scoring=scoring,
     )
 
 
@@ -124,26 +145,30 @@ def get_api_key(path: str = None):
 
 
 class RunnerManager:
-
     def __init__(self, config: AppConfig):
         self.config = config
         self._all_runners: List[BaseRunner] = []
         self.active_runners: List[BaseRunner] = []
         self.report: List[HealthReportItem] = []
 
-    def build_runners(self) -> List[BaseRunner]:
+    def build_runners(self) -> None:
         runners: List[BaseRunner] = []
 
         for m in self.config.models:
+            if not m.enable:
+                continue
+
             runner_type = m.runner.lower().strip()
 
             if runner_type == "ollama":
                 ollama_bin = str(m.runner_config.get("ollama_bin", "ollama"))
+                no_think = bool(m.runner_config.get("no_think", False))
                 runners.append(
                     OllamaRunner(
                         name=m.name,
                         model=m.model,
                         ollama_bin=ollama_bin,
+                        no_think=no_think,
                     )
                 )
             elif runner_type == "openai":
@@ -167,7 +192,6 @@ class RunnerManager:
                 )
 
         self._all_runners = runners
-        return runners
 
     async def initialize(self) -> None:
         self.build_runners()
@@ -213,5 +237,12 @@ class RunnerManager:
             )
             raise RuntimeError(f"No active models after health checks.\n{errors}")
 
-    def get_context(self) -> Tuple[str, List[str]]:
-        return self.config.language, self.config.tags
+    def get_context(
+        self,
+    ) -> Tuple[str, List[str], Optional[List[str]], Dict[str, float]]:
+        return (
+            self.config.language,
+            self.config.tags,
+            self.config.rules,
+            self.config.scoring.weights,
+        )
