@@ -135,6 +135,8 @@ models:
     type: ollama
     model: qwen2.5-coder
     weight: 1.0
+    runner_config:
+      no_think: true # to disable deep thinking to shorten
 
 settings:
   log_path: readability_log.txt
