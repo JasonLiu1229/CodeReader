@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+import os
 
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Protocol
@@ -89,13 +90,15 @@ async def run_subprocess(
     loop = asyncio.get_running_loop()
     start = loop.time()
 
+    clean_env = {**os.environ, "TERM": "dumb", "NO_COLOR": "1", **(env or {})}
+
     try:
         proc = await asyncio.create_subprocess_exec(
             *cmd,
             stdin=asyncio.subprocess.PIPE if stdin_text is not None else None,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            env=env,
+            env=clean_env,
         )
     except FileNotFoundError as e:
         dur = loop.time() - start
@@ -184,6 +187,16 @@ def _try_parse_from(text: str, start: int) -> Optional[Dict[str, Any]]:
     return None
 
 
+def clean_output(text: str):
+    text = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", text)
+
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+
+    text = re.sub(r"Thinking\.\.\..*?\.\.\.done thinking\.", "", text, flags=re.DOTALL)
+
+    return text
+
+
 def extract_json_object(text: str) -> Optional[Dict[str, Any]]:
     """
     Robustly extract the first valid JSON object from model output.
@@ -199,9 +212,7 @@ def extract_json_object(text: str) -> Optional[Dict[str, Any]]:
     - Nested objects: {"subscores": {"a": 1}}
     """
 
-    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
-
-    text = re.sub(r"Thinking\.\.\..*?\.\.\.done thinking\.", "", text, flags=re.DOTALL)
+    text = clean_output(text)
 
     fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     if fenced:
