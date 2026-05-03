@@ -201,6 +201,8 @@ def extract_json_object(text: str) -> Optional[Dict[str, Any]]:
 
     text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
 
+    text = re.sub(r"Thinking\.\.\..*?\.\.\.done thinking\.", "", text, flags=re.DOTALL)
+
     fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     if fenced:
         blob = fenced.group(1).strip()
