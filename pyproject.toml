@@ -1,6 +1,6 @@
 [project]
 name = "codereader"
-version = "0.7.0"
+version = "0.7.1"
 description = "Local code readability grader using LLMs"
 authors = [
     {name = "Jason Liu",email = "Liujason2003@gmail.com"}
