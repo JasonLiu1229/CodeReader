@@ -119,7 +119,7 @@ class OllamaRunner:
 
         cmd = (
             [self.ollama_bin, "run"]
-            + (["--think=false"] if self.no_think else ["--hidethinking"])
+            + (["--think=false"] if self.no_think else [])
             + [self.model]
         )
 
@@ -148,7 +148,7 @@ class OllamaRunner:
                 rationale="",
             )
 
-        score = compute_weighted_score(parsed) or clamp_score(parsed.get("score"))
+        score = clamp_score(parsed.get("score")) or compute_weighted_score(parsed)
         rationale = parsed.get("rationale", "")
         if score is None:
             return GradeResult(
