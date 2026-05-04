@@ -55,7 +55,7 @@ class OllamaRunner:
         """
         global _SERVER_CHECK
 
-        if _SERVER_CHECK is not None:
+        if _SERVER_CHECK is not None and _SERVER_CHECK.ok:
             return _SERVER_CHECK
 
         cmd = [self.ollama_bin, "list"]
@@ -66,7 +66,7 @@ class OllamaRunner:
             return res
 
         if _looks_like_ollama_server_down(res.stderr, res.stdout, res.error):
-            _SERVER_CHECK = RunnerResult(
+            return RunnerResult(
                 ok=False,
                 stdout=res.stdout,
                 stderr=res.stderr,
@@ -78,7 +78,6 @@ class OllamaRunner:
                     "Then retry your command."
                 ),
             )
-            return _SERVER_CHECK
 
         _SERVER_CHECK = res
         return res
@@ -118,10 +117,11 @@ class OllamaRunner:
     ) -> GradeResult:
         prompt = format_prompt(self.grade_prompt_template, tags, rules, language, code)
 
-        if self.no_think:
-            prompt = "/no_think\n" + prompt
-
-        cmd = [self.ollama_bin, "run", self.model]
+        cmd = (
+            [self.ollama_bin, "run"]
+            + (["--think=false"] if self.no_think else [])
+            + [self.model]
+        )
 
         res = await run_subprocess(cmd, stdin_text=prompt, timeout_s=timeout_s)
         print(f"[DEBUG {self.name}] raw output: {repr(res.stdout[:800])}", flush=True)
