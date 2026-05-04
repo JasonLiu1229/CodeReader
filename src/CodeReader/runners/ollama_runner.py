@@ -119,7 +119,7 @@ class OllamaRunner:
 
         cmd = (
             [self.ollama_bin, "run"]
-            + (["--think=false"] if self.no_think else [])
+            + (["--think=false"] if self.no_think else ["--hidethinking"])
             + [self.model]
         )
 
