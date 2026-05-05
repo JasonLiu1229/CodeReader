@@ -187,13 +187,12 @@ def _try_parse_from(text: str, start: int) -> Optional[Dict[str, Any]]:
     return None
 
 
-def clean_output(text: str):
+def clean_output(text: str) -> str:
     text = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", text)
-
+    text = re.sub(r"\x1b.", "", text)
     text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
-
     text = re.sub(r"Thinking\.\.\..*?\.\.\.done thinking\.", "", text, flags=re.DOTALL)
-
+    text = re.sub(r"\n(?=[^{]*})", " ", text)
     return text
 
 
@@ -232,6 +231,14 @@ def extract_json_object(text: str) -> Optional[Dict[str, Any]]:
 
         if any(k in parsed for k in ("score", "subscores", "scores", "rationale")):
             return parsed
+
+    score_match = re.search(r'"score"\s*:\s*(\d+)', text)
+    if score_match:
+        try:
+            score = int(score_match.group(1))
+            return {"score": score}
+        except Exception:
+            pass
 
     return None
 
