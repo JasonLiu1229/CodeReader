@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+import os
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -104,6 +105,13 @@ class TransformersRunner:
             return self._pipeline
 
         _, AutoModelForCausalLM, AutoTokenizer, pipeline = _import_transformers()
+
+        token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+        if token:
+            from huggingface_hub import login
+
+            login(token=token, add_to_git_credential=False)
+
         device = self._resolve_device()
         dtype = self._dtype()
 
@@ -111,7 +119,7 @@ class TransformersRunner:
 
         model = AutoModelForCausalLM.from_pretrained(
             self.model,
-            torch_dtype=dtype,
+            dtype=dtype,
             device_map=device if device == "auto" else None,
             trust_remote_code=True,
         )
@@ -137,8 +145,17 @@ class TransformersRunner:
         return pipe
 
     def _generate(self, prompt: str) -> str:
-        """Run a single forward pass and return the *new* tokens as a string."""
         pipe = self._build_pipeline()
+
+        if hasattr(pipe.tokenizer, "apply_chat_template"):
+            messages = [{"role": "user", "content": prompt}]
+            formatted = pipe.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+            )
+        else:
+            formatted = prompt
 
         gen_kwargs = dict(
             max_new_tokens=self.max_new_tokens,
@@ -148,8 +165,7 @@ class TransformersRunner:
             return_full_text=False,
         )
 
-        outputs = pipe(prompt, **gen_kwargs)
-
+        outputs = pipe(formatted, **gen_kwargs)
         return outputs[0]["generated_text"] if outputs else ""
 
     async def health_check(self, timeout_s: float = 60.0) -> RunnerResult:

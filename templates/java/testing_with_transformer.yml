@@ -1,0 +1,26 @@
+language: java
+
+tags:
+  - identifiers
+  - variable naming
+
+settings:
+  timeout_seconds: 120
+  health_timeout_seconds: 60
+  max_concurrency: 1
+  fail_on_no_active_models: true
+  log_path: transformers_test_log.txt
+  debug_jsonl_path: transformers_test_responses.jsonl
+
+models:
+  - name: qwen2.5-coder
+    model: Qwen/Qwen2.5-Coder-7B-Instruct
+    runner: transformers
+    runner_config:
+      adapter_path: ../../out/adapter/120426/adapter_15pct   # replace with your adapter path, or remove if not using one
+      device: auto
+      torch_dtype: bfloat16   
+      max_new_tokens: 1000
+      temperature: 0.1
+    weight: 1.0
+    enable: true

@@ -10,6 +10,7 @@ import yaml
 
 from codereader.runners.ollama_runner import OllamaRunner
 from codereader.runners.openai_runner import OpenAIRunner
+from codereader.runners.transformers_runner import TransformersRunner
 from codereader.runners.runner import BaseRunner, RunnerResult
 from codereader.runners.utils import DEFAULT_WEIGHTS
 from dotenv import load_dotenv
@@ -171,6 +172,7 @@ class RunnerManager:
                         no_think=no_think,
                     )
                 )
+
             elif runner_type == "openai":
                 base_url = str(
                     m.runner_config.get("base_url", "https://api.openai.com/v1")
@@ -185,10 +187,26 @@ class RunnerManager:
                         api_key=api_key,
                     )
                 )
+
+            elif runner_type == "transformers":
+                runners.append(
+                    TransformersRunner(
+                        name=m.name,
+                        model=m.model,
+                        adapter_path=m.runner_config.get("adapter_path", None),
+                        device=str(m.runner_config.get("device", "auto")),
+                        torch_dtype=str(m.runner_config.get("torch_dtype", "float16")),
+                        max_new_tokens=int(m.runner_config.get("max_new_tokens", 512)),
+                        temperature=float(m.runner_config.get("temperature", 0.1)),
+                        do_sample=bool(m.runner_config.get("do_sample", True)),
+                        no_think=bool(m.runner_config.get("no_think", False)),
+                    )
+                )
+
             else:
-                # TODO: add "llamacpp" / "transformers" here
                 raise ValueError(
-                    f"Unsupported runner type: '{m.runner}' for model '{m.name}'"
+                    f"Unsupported runner type: '{m.runner}' for model '{m.name}'. "
+                    f"Supported types: ollama, openai, transformers"
                 )
 
         self._all_runners = runners
